@@ -112,8 +112,12 @@ numbers on each submission.
 | --- | --- | --- | --- | --- |
 | Clean and poisoned model accuracy | 08 | 100 | 100 | 27 |
 | FGSM transfer, wide-margin model | 09 | 150 | 87 | 42 |
-| FGSM transfer, narrow-margin model | earlier version of 09 | 400 | not recorded | not recorded |
+| FGSM transfer, narrow-margin model | earlier code, superseded by 09 | 400 | not recorded | not recorded |
 
+The narrow-margin transfer run predates the scripts in this repository.
+Its output is `results/transferability_hw_50_expA.json`, which script 10
+converts into the format the figures read. The run used the same circuit
+and the same optimization level as script 09.
 
 The two recorded depths differ. The transpiler picks physical qubits by
 heuristic, so the same circuit maps differently on each submission. Both
