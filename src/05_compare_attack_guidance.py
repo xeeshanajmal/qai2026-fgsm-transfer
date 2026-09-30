@@ -20,14 +20,14 @@ data/X_test.npy, data/y_test.npy
 models/noisy_0.0_params.npy          wide-margin model
 models/clean_params.npy              narrow-margin model
 
-Outputs
--------
+Output
+------
 results/gradient_vs_untargeted.json
 
 Usage
 -----
-    python -u compare_attack_guidance.py
-    python -u compare_attack_guidance.py --trials 20 --n 60
+    python -u 05_compare_attack_guidance.py
+    python -u 05_compare_attack_guidance.py --trials 20 --n 60
 """
 
 from __future__ import annotations
@@ -110,10 +110,10 @@ def wilson_interval(successes: int, trials: int,
         return 0.0, 0.0
     p = successes / trials
     denominator = 1 + z * z / trials
-    centre = (p + z * z / (2 * trials)) / denominator
+    center = (p + z * z / (2 * trials)) / denominator
     spread = z * np.sqrt(p * (1 - p) / trials
                          + z * z / (4 * trials * trials)) / denominator
-    return float(centre - spread), float(centre + spread)
+    return float(center - spread), float(center + spread)
 
 
 def evaluate(name: str, params: np.ndarray, X_test: np.ndarray,
@@ -210,11 +210,6 @@ def main() -> None:
               encoding="utf-8") as handle:
         json.dump(results, handle, indent=2)
     log("\nsaved results/gradient_vs_untargeted.json")
-
-    log("\nThe ratio column gives how many times more effective gradient")
-    log("guidance is than untargeted noise of the same budget. A ratio")
-    log("that grows as the budget falls means gradient access matters most")
-    log("when the attacker is most constrained.")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
-"""Build the train, validation and test splits from CICIDS2017.
+"""Build the train and test splits from CICIDS2017.
 
 Reads the Friday afternoon DDoS capture, reduces it to four features, and
-writes the arrays every other script in this repository starts from.
+writes the arrays every other script starts from.
 
 The label convention is +1 for benign traffic and -1 for attack traffic,
 matching the sign of the Pauli-Z expectation value the classifier
@@ -12,10 +12,10 @@ A note on the transform order
 The scaler and PCA are fitted on the full dataset before the train and
 test split, so the test features influence the fitted transforms. This is
 transductive rather than label leakage, since neither transform sees a
-label, and it is disclosed in the paper. It is preserved here rather than
-corrected because refitting on the training split alone would produce a
-different test set, which would invalidate the hardware runs already
-recorded in results/.
+label, and the paper discloses it. It is kept rather than corrected
+because refitting on the training split alone would produce a different
+test set, which would invalidate the hardware runs already recorded in
+results/.
 
 Input
 -----
@@ -133,7 +133,7 @@ def main() -> None:
         f"{(y_test == 1).sum()} benign")
     log(f"feature range [{X_train.min():.3f}, {X_train.max():.3f}]")
     log(f"\nwrote four arrays to {args.out_dir}/")
-    log("\nThe published splits have 1134 attack and 866 benign in "
+    log("\nThe splits used in the paper have 1134 attack and 866 benign in "
         "training,\nand 284 attack and 216 benign in test. A different "
         "count means a\ndifferent capture file or a different "
         "scikit-learn version.")

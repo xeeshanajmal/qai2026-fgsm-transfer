@@ -1,39 +1,41 @@
-"""
-FGSM transfer to IBM Fez, measured against the retrained (Adam) model.
+"""FGSM transfer to IBM Fez, measured against the wide-margin model.
 
-Adapted from notebook cell 24, with four changes:
-  - Loads models/noisy_0.0_params.npy (Adam) instead of clean_params.npy (COBYLA).
-  - All circuits go in ONE job instead of one job per circuit. Cell 24 queued
-    100 separate jobs; this queues one, which is the difference between a day
-    of queue time and a few minutes.
-  - The token comes from an environment variable, never from the file.
-  - Records transpiled depth and two-qubit gate count, which is the partial
-    answer to reviewer 7 point 7 about separating transpilation from noise.
+Adversarial examples are generated on the simulator, then the original
+and perturbed inputs are classified on hardware. Comparing simulator and
+hardware attack success at the same budget is what measures transfer.
 
-Epsilon values come from the sweep: 0.30 gives 33.3% success in simulation,
-0.50 gives 71.7%. Two points far enough apart that hardware noise cannot blur
-them together.
+All circuits go in one job, so every circuit shares one calibration
+state. Transpiled depth and two-qubit gate count are recorded alongside
+the results, which is what allows transpilation overhead to be reported
+separately from device noise.
 
-Before running, set the credentials in the same terminal:
+The two budgets are far enough apart in simulation that device noise
+cannot blur them together.
+
+Credentials are read from the environment:
 
     PowerShell:
-        $env:IBM_API_KEY = "your-new-token"
-        $env:IBM_INSTANCE = "your-crn"
+        $env:IBM_API_KEY = "<token>"
+        $env:IBM_INSTANCE = "<crn>"
 
     cmd:
-        set IBM_API_KEY=your-new-token
-        set IBM_INSTANCE=your-crn
+        set IBM_API_KEY=<token>
+        set IBM_INSTANCE=<crn>
 
-Use the ROTATED token. The old one was in the notebook.
+Inputs
+------
+data/X_test.npy, data/y_test.npy
+models/noisy_0.0_params.npy
 
-Inputs  : data/X_test.npy, data/y_test.npy
-          models/noisy_0.0_params.npy
-Outputs : results/hardware_fgsm_adam.json
+Output
+------
+results/hardware_fgsm_adam.json
 
-Usage:
-    python -u run_hardware_fgsm.py
-    python -u run_hardware_fgsm.py --dry-run     # build and transpile, submit nothing
-    python -u run_hardware_fgsm.py --eps 0.30    # one epsilon only
+Usage
+-----
+    python -u 09_run_hardware_fgsm.py
+    python -u 09_run_hardware_fgsm.py --dry-run
+    python -u 09_run_hardware_fgsm.py --eps 0.30
 """
 
 import argparse
@@ -137,16 +139,16 @@ def wilson(k, n, z=1.96):
         return 0.0, 0.0
     p = k / n
     d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
+    center = (p + z * z / (2 * n)) / d
     half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return float(centre - half), float(centre + half)
+    return float(center - half), float(center + half)
 
 
 # ----------------------------------------------------------------------------
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--dry-run", action="store_true",
                         help="build and transpile everything, submit nothing")
     parser.add_argument("--eps", type=float, nargs="*", default=None)
@@ -228,7 +230,6 @@ def main():
     result = job.result()
     log(f"  returned after {time.time() - t0:.0f}s")
 
-    # Parse
     preds_by_tag = {}
     for k, (tag, idx, _) in enumerate(jobs):
         counts = result[k].data.c.get_counts()
@@ -280,7 +281,6 @@ def main():
     os.makedirs("results", exist_ok=True)
     json.dump(out, open("results/hardware_fgsm_adam.json", "w"), indent=2)
     log("\nsaved results/hardware_fgsm_adam.json")
-    log("Simulator ASR inside the hardware interval means the attack transfers.")
 
 
 if __name__ == "__main__":

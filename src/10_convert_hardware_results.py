@@ -1,18 +1,16 @@
 """Convert the narrow-margin hardware transfer run into the standard format.
 
-The FGSM transfer experiment was run against both classifiers. The wide-margin
-run was written by run_hardware_fgsm.py in the current result format. The
-narrow-margin run predates that script and stored its output under a different
-schema, without Wilson intervals.
+The FGSM transfer experiment was run against both classifiers. The
+wide-margin run was written by 09_run_hardware_fgsm.py in the current
+result format. The narrow-margin run came from an earlier campaign and
+stored its output under a different schema, without Wilson intervals.
 
-This reads the older file, recomputes the intervals from the recorded counts,
-and writes it in the same shape as the wide-margin result, so that
-make_figures.py reads both through one code path and neither is entered by
-hand.
+This reads the older file, recomputes the intervals from the recorded
+counts, and writes it in the same shape as the wide-margin result, so
+that make_figures.py reads both through one code path.
 
-The transfer panel of Figure 1 uses both files. Without this conversion it
-falls back to the wide-margin results alone, which halves the evidence behind
-the transfer claim.
+Figure 1 plots both files. Without this conversion it falls back to the
+wide-margin results alone.
 
 Input
 -----
@@ -24,8 +22,8 @@ results/hardware_fgsm_cobyla.json
 
 Usage
 -----
-    python -u convert_narrow_margin_hardware.py
-    python -u convert_narrow_margin_hardware.py --input path/to/file.json
+    python -u 10_convert_hardware_results.py
+    python -u 10_convert_hardware_results.py --input path/to/file.json
 """
 
 from __future__ import annotations
@@ -51,10 +49,10 @@ def wilson_interval(successes: int, trials: int,
         return 0.0, 0.0
     p = successes / trials
     denominator = 1 + z * z / trials
-    centre = (p + z * z / (2 * trials)) / denominator
+    center = (p + z * z / (2 * trials)) / denominator
     spread = z * np.sqrt(p * (1 - p) / trials
                          + z * z / (4 * trials * trials)) / denominator
-    return float(centre - spread), float(centre + spread)
+    return float(center - spread), float(center + spread)
 
 
 def main() -> None:

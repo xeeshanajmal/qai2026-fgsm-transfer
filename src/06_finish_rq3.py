@@ -1,31 +1,38 @@
-"""
-Two gaps left in RQ3 after the main retraining run.
+"""Matched-size noiseless baseline, and FGSM across noise levels.
 
-1. The noiseless level trained on 1601 samples while the noisy levels trained
-   on a fixed subsample of 400. Comparing them across noise levels is
-   confounded by training set size. This retrains the noiseless level on the
-   same 400 samples so there is a like-for-like row.
+Two evaluations that complete the noise results.
 
-2. The FGSM column came out 0.0% at every noise level because it ran at
-   epsilon 0.10, where the epsilon sweep already showed the attack does
-   nothing against an Adam-trained model. Re-evaluating at epsilon 0.30 and
-   0.50 turns that column from "no signal" into an answer about whether
-   simulated device noise changes attack success.
+Part 1 trains a noiseless model on the same MAX_TRAIN_NOISY samples the
+density matrix levels use, so clean accuracy can be compared across noise
+levels without a training-set-size confound. Script 03 trains its
+noiseless level on the full training split, which is faster but not
+comparable.
 
-Part 2 is evaluation only. It loads the parameter files the main run already
-saved and never retrains, so it costs seconds per noise level rather than the
-16 minutes per seed the training took.
+Part 2 measures FGSM success at each noise level. Attacks are generated
+against each level's own model on that level's simulator, which is what
+makes this a test of whether simulated device noise changes adversarial
+vulnerability. The budgets here are larger than the 0.10 used in script
+03, where the attack does nothing against an Adam-trained model.
 
-Inputs  : data/X_train.npy, data/y_train.npy, data/X_test.npy, data/y_test.npy
-          models/noisy_0.0_params.npy, models/noisy_0.001_params.npy,
-          models/noisy_0.01_params.npy, models/noisy_0.05_params.npy
-Outputs : results/noiseless_400_baseline.json
-          results/noise_fgsm_sweep.json
+Part 2 is evaluation only. It loads the parameter files script 03 saved
+and never retrains, so it costs seconds per noise level.
 
-Usage:
-    python -u finish_rq3.py                 # both parts
-    python -u finish_rq3.py --only fgsm     # part 2 only, seconds
-    python -u finish_rq3.py --only baseline # part 1 only, ~2 minutes
+Inputs
+------
+data/X_train.npy, data/y_train.npy, data/X_test.npy, data/y_test.npy
+models/noisy_0.0_params.npy, models/noisy_0.001_params.npy,
+models/noisy_0.01_params.npy, models/noisy_0.05_params.npy
+
+Outputs
+-------
+results/noiseless_400_baseline.json
+results/noise_fgsm_sweep.json
+
+Usage
+-----
+    python -u 06_finish_rq3.py
+    python -u 06_finish_rq3.py --only fgsm
+    python -u 06_finish_rq3.py --only baseline
 """
 
 import argparse
@@ -37,7 +44,8 @@ import numpy as np
 import pennylane as qml
 from pennylane import numpy as pnp
 
-# Must match retrain_poisoning_and_noise.py exactly.
+# These must match 03_retrain_poisoning_and_noise.py exactly, or the
+# baseline is not comparable with the noisy levels.
 N_QUBITS = 4
 N_LAYERS = 3
 N_PARAMS = N_LAYERS * N_QUBITS * 2
@@ -135,9 +143,9 @@ def wilson(k, n, z=1.96):
         return 0.0, 0.0
     p = k / n
     d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
+    center = (p + z * z / (2 * n)) / d
     half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return float(centre - half), float(centre + half)
+    return float(center - half), float(center + half)
 
 
 def flip_labels(y, rate, seed=42):
@@ -167,7 +175,7 @@ def load_splits():
 
 
 # ----------------------------------------------------------------------------
-# Part 1: like-for-like noiseless baseline
+# Part 1: matched-size noiseless baseline
 # ----------------------------------------------------------------------------
 
 
@@ -186,7 +194,7 @@ def train_one_seed(circuit, X_tr, y_tr, X_val, y_val, seed):
 
 def run_baseline(X_full, y_full, tr_idx, val_idx, X_test, y_test):
     log("\n" + "=" * 62)
-    log("PART 1: noiseless baseline on the same 400 samples as the noisy levels")
+    log(f"Part 1: noiseless baseline on {MAX_TRAIN_NOISY} samples")
     log("=" * 62)
 
     circuit = make_circuit(0.0)
@@ -240,7 +248,7 @@ def run_baseline(X_full, y_full, tr_idx, val_idx, X_test, y_test):
 
 
 # ----------------------------------------------------------------------------
-# Part 2: FGSM at working epsilon, across noise levels
+# Part 2: FGSM across noise levels
 # ----------------------------------------------------------------------------
 
 
@@ -254,11 +262,8 @@ def fgsm(circuit, x, y_true, params, epsilon):
 
 def run_fgsm(X_test, y_test):
     log("\n" + "=" * 62)
-    log("PART 2: FGSM across noise levels at working epsilon")
+    log("Part 2: FGSM across noise levels")
     log("=" * 62)
-    log("Attacks are generated against each noise level's own model, using")
-    log("that level's simulator. This asks whether simulated device noise")
-    log("changes how vulnerable the model is, which is what RQ3 should test.")
 
     results = []
     for noise_p in NOISE_PROBS:
@@ -317,7 +322,7 @@ def run_fgsm(X_test, y_test):
 
     if results:
         log("\n" + "=" * 62)
-        log("SUMMARY")
+        log("Summary")
         log("=" * 62)
         header = f"{'level':>10} {'margin':>8}"
         for eps in FGSM_EPSILONS:
@@ -328,9 +333,6 @@ def run_fgsm(X_test, y_test):
             for e in r["epsilons"]:
                 row += f" {e['attack_success_rate']:>9.1%}"
             log(row)
-        log("\nIf ASR is flat across noise levels, simulated depolarizing noise")
-        log("does not change adversarial vulnerability. That matches hardware")
-        log("classifying 50/50 clean samples correctly.")
 
     return results
 
@@ -339,7 +341,7 @@ def run_fgsm(X_test, y_test):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--only", choices=["baseline", "fgsm"], default=None)
     args = parser.parse_args()
 

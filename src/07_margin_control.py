@@ -1,15 +1,12 @@
 """Vary decision margin with everything else held fixed.
 
-The two-model comparison elsewhere in this work differs in optimiser as well
-as in decision margin, so it associates margin with adversarial exposure
-rather than isolating it. This experiment removes the confound: a single
-training run is snapshotted at a sequence of epoch counts, so every
-checkpoint shares the same initialisation, the same data, the same optimiser
-and the same learning rate. Training length is the only thing that changes,
-and margin grows with it.
-
-If attack success falls as margin rises along one trajectory, margin is
-associated with exposure independently of how the model was trained.
+The two-model comparison elsewhere in this work differs in optimizer as
+well as in decision margin, so it associates margin with adversarial
+exposure rather than isolating it. This experiment removes the confound.
+A single training run is snapshotted at a sequence of epoch counts, so
+every checkpoint shares the same initialization, the same data, the same
+optimizer and the same learning rate. Training length is the only thing
+that changes, and margin grows with it.
 
 Inputs
 ------
@@ -23,8 +20,8 @@ results/margin_control.json
 
 Usage
 -----
-    python -u margin_control.py
-    python -u margin_control.py --seeds 5 --epsilons 0.20 0.30
+    python -u 07_margin_control.py
+    python -u 07_margin_control.py --seeds 5 --epsilons 0.20 0.30
 """
 
 from __future__ import annotations
@@ -113,10 +110,10 @@ def wilson_interval(successes: int, trials: int,
         return 0.0, 0.0
     p = successes / trials
     denominator = 1 + z * z / trials
-    centre = (p + z * z / (2 * trials)) / denominator
+    center = (p + z * z / (2 * trials)) / denominator
     spread = z * np.sqrt(p * (1 - p) / trials
                          + z * z / (4 * trials * trials)) / denominator
-    return float(centre - spread), float(centre + spread)
+    return float(center - spread), float(center + spread)
 
 
 def load_splits():
@@ -178,7 +175,7 @@ def train_with_checkpoints(X_train, y_train, X_val, y_val, X_test, y_test,
     """One trajectory, evaluated at each checkpoint without restarting."""
     rng = np.random.default_rng(seed)
     params = pnp.array(rng.uniform(0, 2 * np.pi, N_PARAMS), requires_grad=True)
-    optimiser = qml.AdamOptimizer(stepsize=LEARNING_RATE)
+    optimizer = qml.AdamOptimizer(stepsize=LEARNING_RATE)
 
     def loss(p):
         return hinge_loss(X_train, y_train, p)
@@ -188,7 +185,7 @@ def train_with_checkpoints(X_train, y_train, X_val, y_val, X_test, y_test,
     for target in sorted(checkpoints):
         started = time.time()
         while epoch < target:
-            params = optimiser.step(loss, params)
+            params = optimizer.step(loss, params)
             epoch += 1
         snapshot = np.array(params)
         record = evaluate(snapshot, X_test, y_test, epsilons, n_samples)
@@ -239,7 +236,7 @@ def main() -> None:
 
     # Aggregate across seeds, so the summary reads as one curve.
     log("\n" + "=" * 70)
-    log("MEAN ACROSS SEEDS")
+    log("Mean across seeds")
     log("=" * 70)
     header = f"{'epochs':>7} {'accuracy':>10} {'margin':>9}"
     for epsilon in args.epsilons:
@@ -258,10 +255,6 @@ def main() -> None:
         log(line)
 
     log(f"\ntotal {time.time() - started:.0f}s")
-    log("\nRead the margin column against the ASR columns. If attack success")
-    log("falls as margin rises along a single trajectory, margin is")
-    log("associated with exposure with the optimiser held fixed, which the")
-    log("two-model comparison alone cannot establish.")
 
 
 if __name__ == "__main__":

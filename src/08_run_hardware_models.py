@@ -1,12 +1,12 @@
 """Evaluate trained classifiers on IBM Quantum hardware.
 
 Measures classification accuracy of one or more trained models on
-unperturbed test samples, so that device behaviour can be compared against
+unperturbed test samples, so that device behavior can be compared against
 simulation. Every circuit is submitted as a single job, so all models are
-evaluated under the same calibration state and the comparison between them
-is not confounded by device drift.
+evaluated under the same calibration state and the comparison between
+them is not confounded by device drift.
 
-Adversarial transfer is measured separately by run_hardware_fgsm.py.
+Adversarial transfer is measured separately by 09_run_hardware_fgsm.py.
 
 Credentials are read from the environment:
 
@@ -24,17 +24,17 @@ data/X_test.npy, data/y_test.npy
 models/noisy_0.0_params.npy              clean model
 models/poisoned_10pct_params.npy         poisoned model
 
-Outputs
--------
+Output
+------
 results/hardware_clean_vs_poisoned.json
     Simulator and hardware accuracy for each model, with Wilson
     intervals, per-sample predictions and transpilation statistics.
 
 Usage
 -----
-    python -u run_hardware_models.py
-    python -u run_hardware_models.py --dry-run
-    python -u run_hardware_models.py --n 50
+    python -u 08_run_hardware_models.py
+    python -u 08_run_hardware_models.py --dry-run
+    python -u 08_run_hardware_models.py --n 50
 """
 
 from __future__ import annotations
@@ -56,7 +56,7 @@ N_LAYERS = 3
 N_SHOTS = 1024
 N_SAMPLES = 50
 BACKEND_NAME = "ibm_fez"
-OPTIMISATION_LEVEL = 1
+OPTIMIZATION_LEVEL = 1
 
 MODELS = [
     ("clean", "models/noisy_0.0_params.npy"),
@@ -138,10 +138,10 @@ def wilson_interval(successes: int, trials: int,
         return 0.0, 0.0
     p = successes / trials
     denominator = 1 + z * z / trials
-    centre = (p + z * z / (2 * trials)) / denominator
+    center = (p + z * z / (2 * trials)) / denominator
     spread = z * np.sqrt(p * (1 - p) / trials
                          + z * z / (4 * trials * trials)) / denominator
-    return float(centre - spread), float(centre + spread)
+    return float(center - spread), float(center + spread)
 
 
 # ---------------------------------------------------------------------------
@@ -204,7 +204,7 @@ def main() -> None:
     log(f"\nbackend {backend.name}, {backend.num_qubits} qubits")
 
     pass_manager = generate_preset_pass_manager(
-        backend=backend, optimization_level=OPTIMISATION_LEVEL)
+        backend=backend, optimization_level=OPTIMIZATION_LEVEL)
 
     log("transpiling")
     transpiled = [pass_manager.run(circuit)
@@ -212,7 +212,7 @@ def main() -> None:
 
     logical, physical = tagged_circuits[0][2], transpiled[0]
     transpilation = {
-        "optimisation_level": OPTIMISATION_LEVEL,
+        "optimisation_level": OPTIMIZATION_LEVEL,
         "logical_depth": int(logical.depth()),
         "logical_two_qubit_gates": int(two_qubit_count(logical)),
         "transpiled_depth": int(physical.depth()),
@@ -266,6 +266,8 @@ def main() -> None:
         hardware_accuracy = correct / len(sample_idx)
         low, high = wilson_interval(correct, len(sample_idx))
 
+        # Fraction of samples where hardware and simulator return the same
+        # label, which separates device error from model accuracy.
         agreement = float(np.mean(hardware == simulated))
 
         log(f"{name:>16} {simulator_accuracy:>10.1%} "
@@ -295,10 +297,6 @@ def main() -> None:
               encoding="utf-8") as handle:
         json.dump(output, handle, indent=2)
     log("\nsaved results/hardware_clean_vs_poisoned.json")
-
-    log("\nThe agreement column gives the fraction of samples on which "
-        "hardware\nand simulator return the same label, which separates "
-        "device error from\ndifferences in model accuracy.")
 
 
 if __name__ == "__main__":

@@ -1,20 +1,16 @@
 """Generate the two figures in the paper from the stored results.
 
-Both are derived from the JSON files written by the experiment scripts,
-so they cannot drift from the numbers reported in the tables.
+Both are drawn from the JSON files the experiment scripts write, so they
+cannot drift from the numbers in the tables.
 
 Figure 1, transfer_scatter
     Attack success measured on IBM Fez against the value predicted in
     simulation, for both classifiers across six perturbation budgets.
-    Points on the identity line transferred without loss. This is the
-    direct form of the transfer claim: two aggregate bars would show the
-    same conclusion with less evidence behind it.
+    Points on the identity line transferred without loss.
 
 Figure 2, noise_bar
     Clean accuracy and decision margin under depolarizing noise, each
-    relative to its noiseless value so both fit one axis. The divergence
-    between them is the point, and a twin axis in absolute units would
-    make the two harder to compare.
+    relative to its noiseless value so both fit one axis.
 
 Inputs
 ------
@@ -50,8 +46,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 
-# Okabe-Ito palette: distinguishable under common colour vision
-# deficiencies and in greyscale.
+# Okabe-Ito palette: distinguishable under common color vision
+# deficiencies and in grayscale.
 COLOR_NARROW = "#D55E00"
 COLOR_WIDE = "#0072B2"
 COLOR_MARGIN = "#666666"
@@ -149,7 +145,7 @@ def figure_transfer(results_dir: str, fig_dir: str, png_only: bool) -> None:
     ax.plot([0, 100], [0, 100], color=COLOR_MARGIN, linewidth=1,
             linestyle=":", zorder=1)
 
-    for source, colour, marker, label in sources:
+    for source, color, marker, label in sources:
         rows = source["epsilons"]
         measured = [percent(row["hardware_asr"]) for row in rows]
         intervals = [[percent(bound) for bound in row["hardware_asr_ci95"]]
@@ -157,7 +153,7 @@ def figure_transfer(results_dir: str, fig_dir: str, png_only: bool) -> None:
         ax.errorbar([percent(row["simulator_asr"]) for row in rows],
                     measured,
                     yerr=asymmetric_error(measured, intervals),
-                    fmt=marker, color=colour, markersize=5, capsize=3,
+                    fmt=marker, color=color, markersize=5, capsize=3,
                     linewidth=1.2, linestyle="none", label=label, zorder=3)
         log(f"    {label}: {len(rows)} paired measurements")
 

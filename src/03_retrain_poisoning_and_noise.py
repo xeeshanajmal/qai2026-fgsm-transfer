@@ -1,38 +1,35 @@
-"""
-Retraining for the QAI 2026 camera-ready: poisoning (RQ1) and noise (RQ3).
+"""Train the wide-margin models for the poisoning and noise experiments.
 
-Replaces the COBYLA training in notebook cells 10 and 14, which fed a fresh
-random minibatch to a gradient-free optimiser and selected the best run on
-test accuracy.
+Trains the classifier with Adam on the full training batch, at several
+label-flipping rates and several depolarizing noise levels. Each
+configuration is trained from N_SEEDS initializations, selected on a
+validation split carved from the training set, and reported as a mean and
+standard deviation across seeds.
 
-Changes from the notebook:
-  - Adam with analytic gradients instead of COBYLA.
-  - Full-batch loss instead of a new random minibatch on every call.
-  - Initialisation drawn from a seeded generator, not the global numpy state.
-  - Model selection on a validation split carved from the training set.
-  - N_SEEDS runs per configuration, reported as mean and standard deviation.
-  - One definition of attack success rate, not three.
+The noiseless configuration runs on a statevector simulator
+(default.qubit). Every noisy configuration runs on a density matrix
+simulator (default.mixed), which is much slower, so the noisy levels
+train on a fixed subsample of MAX_TRAIN_NOISY samples. The subsample is a
+fixed prefix rather than a random draw, which keeps the objective
+deterministic. 06_finish_rq3.py trains a noiseless model at the same size
+so the levels can be compared without a training-set-size confound.
 
-Changes from the first version of this script:
-  - The circuit is evaluated on the whole batch in one call instead of once
-    per sample. That is the difference between 1600 evaluations per gradient
-    step and one.
-  - All output is flushed, so it appears immediately even through a pipe.
-  - Per-seed timing, so the pace is visible from the first seed.
-  - A --smoke flag for a fast end-to-end check.
+Inputs
+------
+data/X_train.npy, data/y_train.npy, data/X_test.npy, data/y_test.npy
 
-Usage:
-    python -u retrain_poisoning_and_noise.py --smoke    # minutes, validates everything
-    python -u retrain_poisoning_and_noise.py            # the real run
+Outputs
+-------
+results/poisoning_retrained.json
+results/noise_retrained.json
+models/poisoned_{rate}pct_params.npy   best validation seed
+models/noisy_{p}_params.npy            best validation seed
 
-The -u matters when running through Jupyter's ! prefix. Without it, Python
-block-buffers stdout and nothing appears until the process ends.
-
-Inputs  : data/X_train.npy, data/y_train.npy, data/X_test.npy, data/y_test.npy
-Outputs : results/poisoning_retrained.json
-          results/noise_retrained.json
-          models/poisoned_{rate}pct_params.npy   (best validation seed)
-          models/noisy_{p}_params.npy            (best validation seed)
+Usage
+-----
+    python -u 03_retrain_poisoning_and_noise.py
+    python -u 03_retrain_poisoning_and_noise.py --smoke
+    python -u 03_retrain_poisoning_and_noise.py --skip-poisoning
 """
 
 import argparse
@@ -65,11 +62,13 @@ POISON_RATE_FOR_NOISE = 0.10
 EPSILON_ADV = 0.10
 N_FGSM_SAMPLES = 60
 
-# Density matrix simulation is far heavier than statevector. If the noisy runs
-# are too slow, cap the training set for them with a FIXED subsample. A fixed
-# subsample keeps the objective deterministic, which is the whole point of
-# moving off COBYLA. Never go back to a fresh random minibatch per step.
-MAX_TRAIN_NOISY = 400     # e.g. 600, or None for the full training split
+# Fixed prefix of the training split used for the density matrix runs.
+# A fixed subsample keeps the objective deterministic. Set to None to use
+# the full training split, which is far slower.
+MAX_TRAIN_NOISY = 400
+
+POISONING_PATH = "results/poisoning_retrained.json"
+NOISE_PATH = "results/noise_retrained.json"
 
 
 def log(*args):
@@ -84,8 +83,8 @@ def log(*args):
 def make_circuit(noise_p=0.0):
     """Return a QNode that accepts either one sample or a batch.
 
-    Note for the paper: the noiseless configuration is statevector simulation
-    on default.qubit, not a density matrix. The methods section should say so.
+    At noise_p = 0 this is statevector simulation on default.qubit. Every
+    other level is a density matrix simulation on default.mixed.
     """
     if noise_p == 0.0:
         dev = qml.device("default.qubit", wires=N_QUBITS)
@@ -136,7 +135,8 @@ def outputs(circuit, X, params):
 
 
 def predict(circuit, X, params):
-    """Class predictions in {-1, +1}. Zero maps to -1 so the attack class wins ties."""
+    """Class predictions in {-1, +1}. Zero maps to -1, so ties go to the
+    attack class."""
     raw = np.array(outputs(circuit, X, pnp.array(params, requires_grad=False)),
                    dtype=float)
     return np.where(raw > 0, 1, -1)
@@ -210,7 +210,7 @@ def train_multi_seed(circuit, X_tr, y_tr, X_val, y_val, X_te, y_te,
 
 
 def fgsm(circuit, x, y_true, params, epsilon):
-    """Ascend the hinge loss in the input. Sign convention matches cells 22 and 24."""
+    """One gradient-sign step ascending the hinge loss in the input."""
     xi = pnp.array(np.array(x, dtype=float), requires_grad=True)
     p = pnp.array(params, requires_grad=False)
     grad = qml.grad(lambda inp: -float(y_true) * circuit(inp, p))(xi)
@@ -220,8 +220,9 @@ def fgsm(circuit, x, y_true, params, epsilon):
 def fgsm_asr(circuit, X, y, params, epsilon, n_samples):
     """Attack success rate over attack samples the model classifies correctly.
 
-    One definition, used everywhere. Cells 12, 21, 22 and 24 each used a
-    different one.
+    Samples the model already gets wrong are excluded, since flipping one
+    is not an attack success. The same definition is used everywhere in
+    this repository.
     """
     idx = np.where(y == -1)[0][:n_samples]
     if len(idx) == 0:
@@ -239,18 +240,18 @@ def fgsm_asr(circuit, X, y, params, epsilon, n_samples):
 
 
 def wilson(k, n, z=1.96):
-    """Wilson score interval. Use this for every proportion in the paper."""
+    """Wilson score interval for a proportion."""
     if n == 0:
         return 0.0, 0.0
     p = k / n
     d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
+    center = (p + z * z / (2 * n)) / d
     half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return float(centre - half), float(centre + half)
+    return float(center - half), float(center + half)
 
 
 def flip_labels(y, rate, seed=42):
-    """Label-flipping poisoning: attack labels relabelled benign."""
+    """Label-flipping poisoning: attack labels relabeled benign."""
     rng = np.random.default_rng(seed)
     y_p = y.copy()
     attack_idx = np.where(y == -1)[0]
@@ -296,7 +297,7 @@ def cap(idx, limit):
 
 def run_poisoning(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg):
     log("\n" + "=" * 60)
-    log("RQ1 poisoning, retrained")
+    log("Poisoning")
     log("=" * 60)
 
     circuit = make_circuit(0.0)
@@ -337,15 +338,17 @@ def run_poisoning(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg):
         log(f"    ASR {entry['attack_success_rate']:.1%}  "
             f"FPR {entry['false_positive_rate']:.1%}")
 
-        json.dump(results, open("results/poisoning_retrained.json", "w"), indent=2)
+        # Written after every rate, so an interrupted run keeps what it
+        # has finished.
+        json.dump(results, open(POISONING_PATH, "w"), indent=2)
 
-    log("\n  saved results/poisoning_retrained.json")
+    log(f"\n  saved {POISONING_PATH}")
     return results
 
 
 def run_noise(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg):
     log("\n" + "=" * 60)
-    log("RQ3 noise, retrained")
+    log("Depolarizing noise")
     log("=" * 60)
 
     y_poisoned, _ = flip_labels(y_full, POISON_RATE_FOR_NOISE)
@@ -408,9 +411,9 @@ def run_noise(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg):
             f"poison ASR {entry['poison_asr']:.1%} | "
             f"FGSM ASR {asr:.1%} ({fooled}/{tested})")
 
-        json.dump(results, open("results/noise_retrained.json", "w"), indent=2)
+        json.dump(results, open(NOISE_PATH, "w"), indent=2)
 
-    log("\n  saved results/noise_retrained.json")
+    log(f"\n  saved {NOISE_PATH}")
     return results
 
 
@@ -418,15 +421,18 @@ def run_noise(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--smoke", action="store_true",
                         help="fast end-to-end check, results not for the paper")
+    parser.add_argument("--skip-poisoning", action="store_true",
+                        help="run only the noise stage and read the poisoning "
+                             "results from disk")
     args = parser.parse_args()
 
     if args.smoke:
         cfg = {"epochs": 20, "n_seeds": 2, "poison_rates": [0.10],
                "noise_probs": [0.0, 0.01], "n_fgsm_samples": 10}
-        log("SMOKE TEST. Numbers below are not usable in the paper.\n")
+        log("Smoke test. The numbers below are not usable in the paper.\n")
     else:
         cfg = {"epochs": EPOCHS, "n_seeds": N_SEEDS,
                "poison_rates": POISON_RATES, "noise_probs": NOISE_PROBS,
@@ -441,17 +447,27 @@ def main():
             log(f"missing {path}. Run this from the folder that holds data/.")
             sys.exit(1)
 
+    if args.skip_poisoning and not os.path.exists(POISONING_PATH):
+        log(f"--skip-poisoning needs {POISONING_PATH}, which does not exist.")
+        log("Run without the flag first.")
+        sys.exit(1)
+
     t_start = time.time()
     X_full, y_full, tr_idx, val_idx, X_test, y_test = load_splits()
     log(f"train {len(tr_idx)}  validation {len(val_idx)}  test {len(y_test)}")
     log(f"pennylane {qml.__version__}")
 
-  # poisoning = run_poisoning(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg)
-    poisoning = json.load(open("results/poisoning_retrained.json"))
+    if args.skip_poisoning:
+        log(f"\nreading poisoning results from {POISONING_PATH}")
+        poisoning = json.load(open(POISONING_PATH))
+    else:
+        poisoning = run_poisoning(X_full, y_full, tr_idx, val_idx,
+                                  X_test, y_test, cfg)
+
     noise = run_noise(X_full, y_full, tr_idx, val_idx, X_test, y_test, cfg)
 
     log("\n" + "=" * 70)
-    log("POISONING (retrained)")
+    log("Poisoning summary")
     log("=" * 70)
     log(f"{'rate':>6} | {'clean acc across seeds':>24} | {'ASR':>8} | {'FPR':>8}")
     for r in poisoning:
@@ -460,7 +476,7 @@ def main():
             f"{r['attack_success_rate']:>7.1%} | {r['false_positive_rate']:>7.1%}")
 
     log("\n" + "=" * 70)
-    log("NOISE (retrained)")
+    log("Noise summary")
     log("=" * 70)
     log(f"{'level':>10} | {'clean acc across seeds':>24} | "
         f"{'poison ASR':>10} | {'FGSM ASR':>9}")
@@ -470,12 +486,6 @@ def main():
             f"{r['poison_asr']:>9.1%} | {r['fgsm_asr']:>8.1%}")
 
     log(f"\ntotal {time.time() - t_start:.0f}s")
-    log("\nCheck before using these numbers:")
-    log("  1. Is the standard deviation across seeds small? If it is still")
-    log("     large, the instability is not only the optimiser.")
-    log("  2. Is poisoning ASR monotone in poison rate?")
-    log("  3. Does noiseless clean accuracy land near the 86.8% baseline?")
-    log("     If it does, reviewer 7 point 5 is resolved.")
 
 
 if __name__ == "__main__":

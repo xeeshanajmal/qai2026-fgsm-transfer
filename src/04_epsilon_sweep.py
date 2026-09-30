@@ -1,34 +1,30 @@
-"""
-FGSM epsilon sweep against the retrained clean model.
+"""FGSM success against perturbation budget, for both classifiers.
 
-Why this exists: FGSM at epsilon 0.10 gives 41% attack success against the
-COBYLA-trained model but 0 of 60 against the Adam-trained one. The retrained
-model classifies with a larger margin, so one FGSM step of 0.10 no longer
-reaches the decision boundary. This sweep finds the epsilon where the attack
-starts to work, or shows that no reasonable epsilon does.
+Sweeps epsilon against the narrow-margin model (COBYLA) and the
+wide-margin model (Adam), and records attack success at each budget with
+Wilson intervals. It also reports each model's decision margin, measured
+as the median |<Z_0>| over correctly classified attack samples, which is
+the quantity that differs between them.
 
-The answer decides what goes on IBM Fez:
-  - If FGSM works at a moderate epsilon, queue hardware runs at that epsilon
-    and the transfer result is measured on the same model family as RQ1 and RQ3.
-  - If it only works at an epsilon comparable to the feature range, the
-    reported vulnerability was partly an artifact of undertraining, and that
-    becomes the finding.
+Features are scaled to [0, pi], so epsilon 0.31 is 10% of the feature
+range and epsilon 0.63 is 20%. The script prints that fraction beside
+every epsilon so the perturbation size stays interpretable.
 
-Both models are swept so the comparison is direct.
+Inputs
+------
+data/X_test.npy, data/y_test.npy
+models/clean_params.npy          narrow margin, COBYLA
+models/noisy_0.0_params.npy      wide margin, Adam
 
-Inputs  : data/X_test.npy, data/y_test.npy
-          models/clean_params.npy          (COBYLA, from notebook cell 8)
-          models/noisy_0.0_params.npy      (Adam, from the retraining run)
-Outputs : results/epsilon_sweep.json
+Output
+------
+results/epsilon_sweep.json
 
-Usage:
-    python -u epsilon_sweep.py
-    python -u epsilon_sweep.py --n 100          # more samples, slower
-    python -u epsilon_sweep.py --model adam     # one model only
-
-Features are scaled to [0, pi], so epsilon 0.31 is 10% of the feature range
-and epsilon 0.63 is 20%. The script prints that fraction beside every epsilon
-so the perturbation size stays interpretable.
+Usage
+-----
+    python -u 04_epsilon_sweep.py
+    python -u 04_epsilon_sweep.py --n 100
+    python -u 04_epsilon_sweep.py --model adam
 """
 
 import argparse
@@ -93,9 +89,9 @@ def wilson(k, n, z=1.96):
         return 0.0, 0.0
     p = k / n
     d = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / d
+    center = (p + z * z / (2 * n)) / d
     half = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
-    return float(centre - half), float(centre + half)
+    return float(center - half), float(center + half)
 
 
 def sweep(name, params, X_test, y_test, n_samples):
@@ -107,9 +103,8 @@ def sweep(name, params, X_test, y_test, n_samples):
     acc = float(np.mean(predict(X_test, params) == y_test))
     log(f"  clean test accuracy: {acc:.1%}")
 
-    # Margin diagnostic. |expectation| on attack samples the model gets right
-    # says how far FGSM has to move the output to flip a decision. This is the
-    # quantity that differs between the two models.
+    # |expectation| on attack samples the model gets right says how far
+    # FGSM has to move the output before a decision flips.
     attack_idx = np.where(y_test == -1)[0][:n_samples]
     raw = raw_outputs(X_test[attack_idx], params)
     correct = raw <= 0
@@ -163,7 +158,7 @@ def sweep(name, params, X_test, y_test, n_samples):
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--n", type=int, default=DEFAULT_N,
                         help="attack samples to test per epsilon")
     parser.add_argument("--model", choices=["both", "cobyla", "adam"],
@@ -192,38 +187,9 @@ def main():
     os.makedirs("results", exist_ok=True)
     json.dump(results, open("results/epsilon_sweep.json", "w"), indent=2)
     log("\nsaved results/epsilon_sweep.json")
-
-    log("\n" + "=" * 62)
-    log("WHAT TO DO WITH THIS")
-    log("=" * 62)
-
-    adam = next((r for r in results if r["model"].startswith("Adam")), None)
-    if adam and adam["sweep"]:
-        working = [r for r in adam["sweep"] if r["attack_success_rate"] >= 0.20]
-        if working:
-            first = working[0]
-            frac = first["epsilon_as_fraction_of_range"]
-            log(f"FGSM reaches 20% success at epsilon {first['epsilon']} "
-                f"({100 * frac:.0f}% of the feature range).")
-            if frac <= 0.15:
-                log("That is a small perturbation. Queue hardware runs at this")
-                log("epsilon and one higher, 50 samples each, original and")
-                log("adversarial. The transfer result then uses the same model")
-                log("family as RQ1 and RQ3.")
-            else:
-                log("That is a large perturbation, no longer small relative to")
-                log("the feature range. Report it as such, and say the attack")
-                log("needs a visible change to the input to succeed against a")
-                log("well-trained model.")
-        else:
-            log("FGSM never reaches 20% success against the Adam model at any")
-            log("epsilon tested. The vulnerability reported at epsilon 0.10")
-            log("against the COBYLA model reflects an undertrained classifier")
-            log("rather than a property of the VQC. That is the finding.")
-
-    log("\nCompare the margin figures between the two models. If the Adam")
-    log("model has a much larger median |output|, that is the mechanism, and")
-    log("it belongs in the discussion.")
+    if args.model != "both":
+        log("--model writes a file holding only that model. Run without it "
+            "to restore both entries.")
 
 
 if __name__ == "__main__":
