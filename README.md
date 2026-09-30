@@ -152,6 +152,7 @@ of the paper explains why.
   booktitle = {IEEE International Conference on Quantum Artificial
                Intelligence (QAI)},
   year      = {2026},
+  note      = {To appear},
 }
 ```
 
