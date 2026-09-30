@@ -1,0 +1,25 @@
+# Raw CICIDS2017 captures are not redistributed
+data/*.csv
+
+# Credentials
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+pyvenv.cfg
+
+# Editor and OS
+.DS_Store
+.vscode/
+.idea/
+
+# LaTeX build products, if the paper source is kept alongside
+*.aux
+*.log
+*.out
+*.bbl
+*.blg
+*.synctex.gz

@@ -1,0 +1,86 @@
+[
+  {
+    "poison_rate": 0.05,
+    "n_flipped": 56,
+    "clean_accuracy": 0.952,
+    "attack_success_rate": 0.0,
+    "asr_ci95": [
+      0.0,
+      0.0133
+    ],
+    "false_positive_rate": 0.1111,
+    "fpr_ci95": [
+      0.0758,
+      0.16
+    ],
+    "selected_val_accuracy": 0.9373,
+    "selected_test_accuracy": 0.952,
+    "test_accuracy_mean": 0.8684,
+    "test_accuracy_std": 0.0832,
+    "test_accuracy_all_seeds": [
+      0.944,
+      0.752,
+      0.908,
+      0.786,
+      0.952
+    ],
+    "n_seeds": 5,
+    "epochs": 150
+  },
+  {
+    "poison_rate": 0.1,
+    "n_flipped": 113,
+    "clean_accuracy": 0.978,
+    "attack_success_rate": 0.0,
+    "asr_ci95": [
+      0.0,
+      0.0133
+    ],
+    "false_positive_rate": 0.0509,
+    "fpr_ci95": [
+      0.0287,
+      0.0889
+    ],
+    "selected_val_accuracy": 0.9223,
+    "selected_test_accuracy": 0.978,
+    "test_accuracy_mean": 0.9024,
+    "test_accuracy_std": 0.0876,
+    "test_accuracy_all_seeds": [
+      0.84,
+      0.76,
+      0.96,
+      0.974,
+      0.978
+    ],
+    "n_seeds": 5,
+    "epochs": 150
+  },
+  {
+    "poison_rate": 0.15,
+    "n_flipped": 170,
+    "clean_accuracy": 0.768,
+    "attack_success_rate": 0.3873,
+    "asr_ci95": [
+      0.3325,
+      0.4451
+    ],
+    "false_positive_rate": 0.0278,
+    "fpr_ci95": [
+      0.0128,
+      0.0593
+    ],
+    "selected_val_accuracy": 0.7519,
+    "selected_test_accuracy": 0.768,
+    "test_accuracy_mean": 0.764,
+    "test_accuracy_std": 0.0077,
+    "test_accuracy_all_seeds": [
+      0.768,
+      0.774,
+      0.756,
+      0.754,
+      0.768
+    ],
+    "n_seeds": 5,
+    "epochs": 150
+  }
+]

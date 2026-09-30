@@ -1,0 +1,8 @@
+pennylane==0.44.1
+qiskit-ibm-runtime>=0.30
+qiskit>=1.2
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.4
+pandas>=2.0
+matplotlib>=3.8

@@ -1,0 +1,86 @@
+[
+  {
+    "noise_prob": 0.0,
+    "label": "noiseless",
+    "simulator": "statevector",
+    "n_train": 1601,
+    "clean_accuracy": 0.922,
+    "clean_accuracy_mean": 0.8547,
+    "clean_accuracy_std": 0.0855,
+    "poison_asr": 0.0423,
+    "poison_asr_ci95": [
+      0.0243,
+      0.0724
+    ],
+    "fgsm_asr": 0.0,
+    "fgsm_asr_ci95": [
+      -0.0,
+      0.0602
+    ],
+    "fgsm_n_tested": 60,
+    "fgsm_n_fooled": 0
+  },
+  {
+    "noise_prob": 0.001,
+    "label": "p=0.001",
+    "simulator": "density matrix",
+    "n_train": 400,
+    "clean_accuracy": 0.95,
+    "clean_accuracy_mean": 0.8907,
+    "clean_accuracy_std": 0.0716,
+    "poison_asr": 0.0,
+    "poison_asr_ci95": [
+      0.0,
+      0.0133
+    ],
+    "fgsm_asr": 0.0,
+    "fgsm_asr_ci95": [
+      -0.0,
+      0.0602
+    ],
+    "fgsm_n_tested": 60,
+    "fgsm_n_fooled": 0
+  },
+  {
+    "noise_prob": 0.01,
+    "label": "p=0.01",
+    "simulator": "density matrix",
+    "n_train": 400,
+    "clean_accuracy": 0.948,
+    "clean_accuracy_mean": 0.8893,
+    "clean_accuracy_std": 0.0706,
+    "poison_asr": 0.0,
+    "poison_asr_ci95": [
+      0.0,
+      0.0133
+    ],
+    "fgsm_asr": 0.0,
+    "fgsm_asr_ci95": [
+      -0.0,
+      0.0602
+    ],
+    "fgsm_n_tested": 60,
+    "fgsm_n_fooled": 0
+  },
+  {
+    "noise_prob": 0.05,
+    "label": "p=0.05",
+    "simulator": "density matrix",
+    "n_train": 400,
+    "clean_accuracy": 0.968,
+    "clean_accuracy_mean": 0.882,
+    "clean_accuracy_std": 0.1064,
+    "poison_asr": 0.0,
+    "poison_asr_ci95": [
+      0.0,
+      0.0133
+    ],
+    "fgsm_asr": 0.0,
+    "fgsm_asr_ci95": [
+      -0.0,
+      0.0602
+    ],
+    "fgsm_n_tested": 60,
+    "fgsm_n_fooled": 0
+  }
+]

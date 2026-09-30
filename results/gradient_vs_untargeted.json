@@ -1,0 +1,166 @@
+[
+  {
+    "model": "wide_margin",
+    "n_correct": 60,
+    "margin_median": 0.5417,
+    "budgets": [
+      {
+        "epsilon": 0.05,
+        "epsilon_as_fraction_of_range": 0.0159,
+        "fgsm_asr": 0.0,
+        "fgsm_n_fooled": 0,
+        "fgsm_n_tested": 60,
+        "fgsm_ci95": [
+          -0.0,
+          0.0602
+        ],
+        "untargeted_asr_mean": 0.0,
+        "untargeted_asr_std": 0.0,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": null
+      },
+      {
+        "epsilon": 0.1,
+        "epsilon_as_fraction_of_range": 0.0318,
+        "fgsm_asr": 0.0,
+        "fgsm_n_fooled": 0,
+        "fgsm_n_tested": 60,
+        "fgsm_ci95": [
+          -0.0,
+          0.0602
+        ],
+        "untargeted_asr_mean": 0.0,
+        "untargeted_asr_std": 0.0,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": null
+      },
+      {
+        "epsilon": 0.2,
+        "epsilon_as_fraction_of_range": 0.0637,
+        "fgsm_asr": 0.05,
+        "fgsm_n_fooled": 3,
+        "fgsm_n_tested": 60,
+        "fgsm_ci95": [
+          0.0171,
+          0.137
+        ],
+        "untargeted_asr_mean": 0.0,
+        "untargeted_asr_std": 0.0,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": null
+      },
+      {
+        "epsilon": 0.3,
+        "epsilon_as_fraction_of_range": 0.0955,
+        "fgsm_asr": 0.3333,
+        "fgsm_n_fooled": 20,
+        "fgsm_n_tested": 60,
+        "fgsm_ci95": [
+          0.2273,
+          0.4594
+        ],
+        "untargeted_asr_mean": 0.0017,
+        "untargeted_asr_std": 0.005,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 200.0
+      },
+      {
+        "epsilon": 0.5,
+        "epsilon_as_fraction_of_range": 0.1592,
+        "fgsm_asr": 0.7167,
+        "fgsm_n_fooled": 43,
+        "fgsm_n_tested": 60,
+        "fgsm_ci95": [
+          0.5923,
+          0.8149
+        ],
+        "untargeted_asr_mean": 0.035,
+        "untargeted_asr_std": 0.0138,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 20.48
+      }
+    ]
+  },
+  {
+    "model": "narrow_margin",
+    "n_correct": 45,
+    "margin_median": 0.0707,
+    "budgets": [
+      {
+        "epsilon": 0.05,
+        "epsilon_as_fraction_of_range": 0.0159,
+        "fgsm_asr": 0.4889,
+        "fgsm_n_fooled": 22,
+        "fgsm_n_tested": 45,
+        "fgsm_ci95": [
+          0.3496,
+          0.63
+        ],
+        "untargeted_asr_mean": 0.02,
+        "untargeted_asr_std": 0.0185,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 24.44
+      },
+      {
+        "epsilon": 0.1,
+        "epsilon_as_fraction_of_range": 0.0318,
+        "fgsm_asr": 0.5333,
+        "fgsm_n_fooled": 24,
+        "fgsm_n_tested": 45,
+        "fgsm_ci95": [
+          0.3908,
+          0.6707
+        ],
+        "untargeted_asr_mean": 0.1156,
+        "untargeted_asr_std": 0.0453,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 4.62
+      },
+      {
+        "epsilon": 0.2,
+        "epsilon_as_fraction_of_range": 0.0637,
+        "fgsm_asr": 0.6,
+        "fgsm_n_fooled": 27,
+        "fgsm_n_tested": 45,
+        "fgsm_ci95": [
+          0.4545,
+          0.7298
+        ],
+        "untargeted_asr_mean": 0.1733,
+        "untargeted_asr_std": 0.0708,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 3.46
+      },
+      {
+        "epsilon": 0.3,
+        "epsilon_as_fraction_of_range": 0.0955,
+        "fgsm_asr": 0.6222,
+        "fgsm_n_fooled": 28,
+        "fgsm_n_tested": 45,
+        "fgsm_ci95": [
+          0.4763,
+          0.7489
+        ],
+        "untargeted_asr_mean": 0.2222,
+        "untargeted_asr_std": 0.0636,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 2.8
+      },
+      {
+        "epsilon": 0.5,
+        "epsilon_as_fraction_of_range": 0.1592,
+        "fgsm_asr": 0.9111,
+        "fgsm_n_fooled": 41,
+        "fgsm_n_tested": 45,
+        "fgsm_ci95": [
+          0.7927,
+          0.9649
+        ],
+        "untargeted_asr_mean": 0.2667,
+        "untargeted_asr_std": 0.071,
+        "untargeted_n_trials": 10,
+        "guidance_ratio": 3.42
+      }
+    ]
+  }
+]

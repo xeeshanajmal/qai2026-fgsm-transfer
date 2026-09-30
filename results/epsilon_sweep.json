@@ -1,0 +1,236 @@
+[
+  {
+    "model": "COBYLA (models/clean_params.npy)",
+    "clean_accuracy": 0.868,
+    "n_attack_samples_correct": 45,
+    "margin_median": 0.0707,
+    "margin_mean": 0.1573,
+    "sweep": [
+      {
+        "epsilon": 0.05,
+        "epsilon_as_fraction_of_range": 0.0159,
+        "attack_success_rate": 0.4889,
+        "n_fooled": 22,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.3496,
+          0.63
+        ],
+        "mean_l2_perturbation": 0.1
+      },
+      {
+        "epsilon": 0.1,
+        "epsilon_as_fraction_of_range": 0.0318,
+        "attack_success_rate": 0.5333,
+        "n_fooled": 24,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.3908,
+          0.6707
+        ],
+        "mean_l2_perturbation": 0.2
+      },
+      {
+        "epsilon": 0.15,
+        "epsilon_as_fraction_of_range": 0.0477,
+        "attack_success_rate": 0.5333,
+        "n_fooled": 24,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.3908,
+          0.6707
+        ],
+        "mean_l2_perturbation": 0.3
+      },
+      {
+        "epsilon": 0.2,
+        "epsilon_as_fraction_of_range": 0.0637,
+        "attack_success_rate": 0.6,
+        "n_fooled": 27,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.4545,
+          0.7298
+        ],
+        "mean_l2_perturbation": 0.4
+      },
+      {
+        "epsilon": 0.3,
+        "epsilon_as_fraction_of_range": 0.0955,
+        "attack_success_rate": 0.6222,
+        "n_fooled": 28,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.4763,
+          0.7489
+        ],
+        "mean_l2_perturbation": 0.6
+      },
+      {
+        "epsilon": 0.4,
+        "epsilon_as_fraction_of_range": 0.1273,
+        "attack_success_rate": 0.7778,
+        "n_fooled": 35,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.6373,
+          0.8746
+        ],
+        "mean_l2_perturbation": 0.8
+      },
+      {
+        "epsilon": 0.5,
+        "epsilon_as_fraction_of_range": 0.1592,
+        "attack_success_rate": 0.9111,
+        "n_fooled": 41,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.7927,
+          0.9649
+        ],
+        "mean_l2_perturbation": 0.9958
+      },
+      {
+        "epsilon": 0.75,
+        "epsilon_as_fraction_of_range": 0.2387,
+        "attack_success_rate": 0.9778,
+        "n_fooled": 44,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.8843,
+          0.9961
+        ],
+        "mean_l2_perturbation": 1.4522
+      },
+      {
+        "epsilon": 1.0,
+        "epsilon_as_fraction_of_range": 0.3183,
+        "attack_success_rate": 1.0,
+        "n_fooled": 45,
+        "n_tested": 45,
+        "asr_ci95": [
+          0.9213,
+          1.0
+        ],
+        "mean_l2_perturbation": 1.8925
+      }
+    ]
+  },
+  {
+    "model": "Adam (models/noisy_0.0_params.npy)",
+    "clean_accuracy": 0.922,
+    "n_attack_samples_correct": 60,
+    "margin_median": 0.5417,
+    "margin_mean": 0.5487,
+    "sweep": [
+      {
+        "epsilon": 0.05,
+        "epsilon_as_fraction_of_range": 0.0159,
+        "attack_success_rate": 0.0,
+        "n_fooled": 0,
+        "n_tested": 60,
+        "asr_ci95": [
+          -0.0,
+          0.0602
+        ],
+        "mean_l2_perturbation": 0.1
+      },
+      {
+        "epsilon": 0.1,
+        "epsilon_as_fraction_of_range": 0.0318,
+        "attack_success_rate": 0.0,
+        "n_fooled": 0,
+        "n_tested": 60,
+        "asr_ci95": [
+          -0.0,
+          0.0602
+        ],
+        "mean_l2_perturbation": 0.2
+      },
+      {
+        "epsilon": 0.15,
+        "epsilon_as_fraction_of_range": 0.0477,
+        "attack_success_rate": 0.0,
+        "n_fooled": 0,
+        "n_tested": 60,
+        "asr_ci95": [
+          -0.0,
+          0.0602
+        ],
+        "mean_l2_perturbation": 0.2998
+      },
+      {
+        "epsilon": 0.2,
+        "epsilon_as_fraction_of_range": 0.0637,
+        "attack_success_rate": 0.05,
+        "n_fooled": 3,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.0171,
+          0.137
+        ],
+        "mean_l2_perturbation": 0.3994
+      },
+      {
+        "epsilon": 0.3,
+        "epsilon_as_fraction_of_range": 0.0955,
+        "attack_success_rate": 0.3333,
+        "n_fooled": 20,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.2273,
+          0.4594
+        ],
+        "mean_l2_perturbation": 0.5983
+      },
+      {
+        "epsilon": 0.4,
+        "epsilon_as_fraction_of_range": 0.1273,
+        "attack_success_rate": 0.6,
+        "n_fooled": 36,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.4737,
+          0.7143
+        ],
+        "mean_l2_perturbation": 0.7965
+      },
+      {
+        "epsilon": 0.5,
+        "epsilon_as_fraction_of_range": 0.1592,
+        "attack_success_rate": 0.7167,
+        "n_fooled": 43,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.5923,
+          0.8149
+        ],
+        "mean_l2_perturbation": 0.9742
+      },
+      {
+        "epsilon": 0.75,
+        "epsilon_as_fraction_of_range": 0.2387,
+        "attack_success_rate": 0.85,
+        "n_fooled": 51,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.7389,
+          0.919
+        ],
+        "mean_l2_perturbation": 1.3743
+      },
+      {
+        "epsilon": 1.0,
+        "epsilon_as_fraction_of_range": 0.3183,
+        "attack_success_rate": 0.8667,
+        "n_fooled": 52,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.7583,
+          0.9309
+        ],
+        "mean_l2_perturbation": 1.7585
+      }
+    ]
+  }
+]

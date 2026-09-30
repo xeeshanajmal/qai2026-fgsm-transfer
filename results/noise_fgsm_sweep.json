@@ -1,0 +1,118 @@
+[
+  {
+    "noise_prob": 0.0,
+    "label": "noiseless",
+    "n_correct": 60,
+    "margin_median": 0.5417,
+    "margin_mean": 0.5487,
+    "epsilons": [
+      {
+        "epsilon": 0.3,
+        "attack_success_rate": 0.3333,
+        "n_fooled": 20,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.2273,
+          0.4594
+        ]
+      },
+      {
+        "epsilon": 0.5,
+        "attack_success_rate": 0.7167,
+        "n_fooled": 43,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.5923,
+          0.8149
+        ]
+      }
+    ]
+  },
+  {
+    "noise_prob": 0.001,
+    "label": "p=0.001",
+    "n_correct": 60,
+    "margin_median": 0.4548,
+    "margin_mean": 0.4895,
+    "epsilons": [
+      {
+        "epsilon": 0.3,
+        "attack_success_rate": 0.3667,
+        "n_fooled": 22,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.2562,
+          0.4932
+        ]
+      },
+      {
+        "epsilon": 0.5,
+        "attack_success_rate": 0.8,
+        "n_fooled": 48,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.6822,
+          0.8817
+        ]
+      }
+    ]
+  },
+  {
+    "noise_prob": 0.01,
+    "label": "p=0.01",
+    "n_correct": 60,
+    "margin_median": 0.3231,
+    "margin_mean": 0.341,
+    "epsilons": [
+      {
+        "epsilon": 0.3,
+        "attack_success_rate": 0.3667,
+        "n_fooled": 22,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.2562,
+          0.4932
+        ]
+      },
+      {
+        "epsilon": 0.5,
+        "attack_success_rate": 0.8,
+        "n_fooled": 48,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.6822,
+          0.8817
+        ]
+      }
+    ]
+  },
+  {
+    "noise_prob": 0.05,
+    "label": "p=0.05",
+    "n_correct": 60,
+    "margin_median": 0.0614,
+    "margin_mean": 0.0761,
+    "epsilons": [
+      {
+        "epsilon": 0.3,
+        "attack_success_rate": 0.5333,
+        "n_fooled": 32,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.4089,
+          0.6537
+        ]
+      },
+      {
+        "epsilon": 0.5,
+        "attack_success_rate": 0.6833,
+        "n_fooled": 41,
+        "n_tested": 60,
+        "asr_ci95": [
+          0.5577,
+          0.7869
+        ]
+      }
+    ]
+  }
+]

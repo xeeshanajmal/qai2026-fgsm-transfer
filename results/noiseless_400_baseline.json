@@ -1,0 +1,30 @@
+{
+  "n_train": 400,
+  "epochs": 150,
+  "n_seeds": 3,
+  "clean": {
+    "selected_test_accuracy": 0.952,
+    "test_accuracy_mean": 0.892,
+    "test_accuracy_std": 0.0712,
+    "test_accuracy_all_seeds": [
+      0.952,
+      0.792,
+      0.932
+    ]
+  },
+  "poisoned": {
+    "selected_test_accuracy": 0.972,
+    "test_accuracy_mean": 0.9753,
+    "test_accuracy_std": 0.0062,
+    "test_accuracy_all_seeds": [
+      0.984,
+      0.972,
+      0.97
+    ]
+  },
+  "poison_asr": 0.0,
+  "poison_asr_ci95": [
+    0.0,
+    0.0133
+  ]
+}

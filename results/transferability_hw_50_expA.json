@@ -1,0 +1,47 @@
+{
+  "backend": "ibm_fez",
+  "n_samples": 50,
+  "n_shots": 1024,
+  "experiment": "FGSM transferability \u2014 Experiment A complete",
+  "fgsm_hardware": [
+    {
+      "epsilon": 0.01,
+      "hw_asr": 0.207,
+      "n_correctly_classified": 29,
+      "n_fooled": 6
+    },
+    {
+      "epsilon": 0.05,
+      "hw_asr": 0.333,
+      "n_correctly_classified": 30,
+      "n_fooled": 10
+    },
+    {
+      "epsilon": 0.1,
+      "hw_asr": 0.414,
+      "n_correctly_classified": 29,
+      "n_fooled": 12
+    },
+    {
+      "epsilon": 0.2,
+      "hw_asr": 0.462,
+      "n_correctly_classified": 26,
+      "n_fooled": 12
+    }
+  ],
+  "simulator_reference": {
+    "fgsm": [
+      0.0,
+      0.38,
+      0.41,
+      0.47
+    ],
+    "quantum_state": [
+      0.0,
+      0.02,
+      0.07,
+      0.18
+    ]
+  },
+  "notes": "Experiment B (quantum-state) incomplete \u2014 token expired at sample 20/50"
+}
