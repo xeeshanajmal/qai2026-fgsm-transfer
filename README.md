@@ -104,11 +104,16 @@ All runs used IBM Fez, a 156-qubit Heron r2 processor. 1024 shots per
 circuit, through Qiskit Runtime SamplerV2. Transpilation was at
 optimization level 1.
 
+Every run submitted the same logical circuit: depth 20 with 12 two-qubit
+gates. Transpilation maps it onto physical qubits, which changes both
+numbers on each submission.
+
 | Result | Script | Circuits | Transpiled depth | Two-qubit gates |
 | --- | --- | --- | --- | --- |
-| Clean and poisoned model accuracy | 08 | 100 | 20 to 100 | 12 to 27 |
-| FGSM transfer, wide-margin model | 09 | 150 | 20 to 87 | 12 to 42 |
+| Clean and poisoned model accuracy | 08 | 100 | 100 | 27 |
+| FGSM transfer, wide-margin model | 09 | 150 | 87 | 42 |
 | FGSM transfer, narrow-margin model | earlier version of 09 | 400 | not recorded | not recorded |
+
 
 The two recorded depths differ. The transpiler picks physical qubits by
 heuristic, so the same circuit maps differently on each submission. Both
